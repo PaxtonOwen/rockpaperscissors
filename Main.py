@@ -1,8 +1,5 @@
 import random
 
-import streamlit as st
-
-
 REGULAR_HANDS = ["Rock", "Paper", "Scissors"]
 BIG_BANG_HANDS = ["Rock", "Paper", "Scissors", "Lizard", "Spock"]
 
@@ -29,31 +26,60 @@ def decide_winner(player: str, computer: str, win_map: dict[str, set[str]]) -> s
     return "You lose"
 
 
-st.title("Rock Paper Scissors")
-mode = st.radio("Choose game mode", ["Regular", "Big Bang", "Impossible"], horizontal=True)
+def choose_mode() -> int:
+    print("Choose mode:")
+    print("1) Regular")
+    print("2) Big Bang")
+    print("3) Impossible")
+    try:
+        return int(input("Enter mode number: "))
+    except ValueError:
+        print("Invalid input")
+        raise SystemExit
 
-if mode == "Regular":
+
+def choose_hand(hands: list[str]) -> str:
+    print("Pick your hand:")
+    for i, hand in enumerate(hands, start=1):
+        print(f"{i}) {hand}")
+
+    try:
+        choice = int(input("Enter hand number: "))
+    except ValueError:
+        print("Invalid input")
+        raise SystemExit
+
+    if not 1 <= choice <= len(hands):
+        print("Invalid input")
+        raise SystemExit
+
+    return hands[choice - 1]
+
+
+mode = choose_mode()
+
+if mode == 1:
     hands = REGULAR_HANDS
     win_map = REGULAR_WINS
-elif mode == "Big Bang":
+elif mode == 2:
     hands = BIG_BANG_HANDS
     win_map = BIG_BANG_WINS
+elif mode == 3:
+    hands = BIG_BANG_HANDS
+    win_map = BIG_BANG_WINS
+    print("Impossible mode: 1 in 10,000 chance to win")
 else:
-    hands = BIG_BANG_HANDS
-    win_map = BIG_BANG_WINS
+    print("Invalid input")
+    raise SystemExit
 
-player_hand = st.selectbox("Pick your hand", hands)
+player_hand = choose_hand(hands)
+computer_hand = random.choice(hands)
 
-if st.button("Play"):
-    computer_hand = random.choice(hands)
-    if mode == "Impossible":
-        result = "You win" if random.randint(1, 10000) == 1 else "You lose"
-    else:
-        result = decide_winner(player_hand, computer_hand, win_map)
+if mode == 3:
+    result = "You win" if random.randint(1, 10000) == 1 else "You lose"
+else:
+    result = decide_winner(player_hand, computer_hand, win_map)
 
-    st.write(f"You chose: {player_hand}")
-    st.write(f"Computer chose: {computer_hand}")
-    st.subheader(result)
-
-if mode == "Impossible":
-    st.caption("Impossible mode: you have a 1 in 10,000 chance to win each round.")
+print(f"You chose: {player_hand}")
+print(f"Computer chose: {computer_hand}")
+print(result)
