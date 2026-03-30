@@ -27,59 +27,83 @@ def decide_winner(player: str, computer: str, win_map: dict[str, set[str]]) -> s
 
 
 def choose_mode() -> int:
-    print("Choose mode:")
-    print("1) Regular")
-    print("2) Big Bang")
-    print("3) Impossible")
-    try:
-        return int(input("Enter mode number: "))
-    except ValueError:
-        print("Invalid input")
-        raise SystemExit
+    while True:
+        print("Choose mode:")
+        print("1) Regular")
+        print("2) Big Bang")
+        print("3) Impossible")
+        try:
+            choice = int(input("Enter mode number: "))
+        except ValueError:
+            print("Invalid input. Please enter 1, 2, or 3.")
+            continue
+
+        if choice in {1, 2, 3}:
+            return choice
+
+        print("Invalid input. Please enter 1, 2, or 3.")
 
 
 def choose_hand(hands: list[str]) -> str:
-    print("Pick your hand:")
-    for i, hand in enumerate(hands, start=1):
-        print(f"{i}) {hand}")
+    while True:
+        print("Pick your hand:")
+        for i, hand in enumerate(hands, start=1):
+            print(f"{i}) {hand}")
 
-    try:
-        choice = int(input("Enter hand number: "))
-    except ValueError:
+        try:
+            choice = int(input("Enter hand number: "))
+        except ValueError:
+            print(f"Invalid input. Please enter a number from 1 to {len(hands)}.")
+            continue
+
+        if 1 <= choice <= len(hands):
+            return hands[choice - 1]
+
+        print(f"Invalid input. Please enter a number from 1 to {len(hands)}.")
+
+
+def play_round() -> None:
+    mode = choose_mode()
+
+    if mode == 1:
+        hands = REGULAR_HANDS
+        win_map = REGULAR_WINS
+    elif mode == 2:
+        hands = BIG_BANG_HANDS
+        win_map = BIG_BANG_WINS
+    elif mode == 3:
+        hands = BIG_BANG_HANDS
+        win_map = BIG_BANG_WINS
+        print("Impossible mode: 1 in 10,000 chance to win")
+    else:
         print("Invalid input")
         raise SystemExit
 
-    if not 1 <= choice <= len(hands):
-        print("Invalid input")
-        raise SystemExit
+    player_hand = choose_hand(hands)
+    computer_hand = random.choice(hands)
 
-    return hands[choice - 1]
+    if mode == 3:
+        result = "You win" if random.randint(1, 10000) == 1 else "You lose"
+    else:
+        result = decide_winner(player_hand, computer_hand, win_map)
+
+    print(f"You chose: {player_hand}")
+    print(f"Computer chose: {computer_hand}")
+    print(result)
 
 
-mode = choose_mode()
+def play_again() -> bool:
+    while True:
+        choice = input("Play again? (y/n): ").strip().lower()
+        if choice in {"y", "yes"}:
+            return True
+        if choice in {"n", "no"}:
+            return False
+        print("Invalid input. Please enter y or n.")
 
-if mode == 1:
-    hands = REGULAR_HANDS
-    win_map = REGULAR_WINS
-elif mode == 2:
-    hands = BIG_BANG_HANDS
-    win_map = BIG_BANG_WINS
-elif mode == 3:
-    hands = BIG_BANG_HANDS
-    win_map = BIG_BANG_WINS
-    print("Impossible mode: 1 in 10,000 chance to win")
-else:
-    print("Invalid input")
-    raise SystemExit
 
-player_hand = choose_hand(hands)
-computer_hand = random.choice(hands)
-
-if mode == 3:
-    result = "You win" if random.randint(1, 10000) == 1 else "You lose"
-else:
-    result = decide_winner(player_hand, computer_hand, win_map)
-
-print(f"You chose: {player_hand}")
-print(f"Computer chose: {computer_hand}")
-print(result)
+while True:
+    play_round()
+    if not play_again():
+        print("Thanks for playing!")
+        break
